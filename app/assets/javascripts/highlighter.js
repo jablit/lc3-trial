@@ -35,7 +35,7 @@ $(function () {
 
 	var $text = $('#text p');
 	
-	$('#text').on('mouseup touchend', function () {
+	$text.on('mouseup touchend', function () {
 		console.log('mouseup/touchend');
 
 		// get selection
@@ -79,7 +79,7 @@ $(function () {
     BootstrapDialog.show({
     	cssClass: 'note-dialog',
 	    title: 'Create Note',
-	    message: '<textarea class="form-control notes">',
+	    message: '<blockquote class="blockquote">' + $this.data('text') + '</blockquote><textarea class="form-control notes">',
 	    onshown: function (dialog) {
       	dialog.$modalContent.find('textarea').focus();
       },
@@ -94,7 +94,8 @@ $(function () {
 	        label: 'Save',
 	        cssClass: 'btn-primary',
 	        action: function (dialog) {
-	        	console.log('you clicked save?');
+	        	var notes = dialog.$modalContent.find('textarea').val();
+	        	console.log('you clicked save?', notes);
 	        	dialog.close();
 	        }
 	      }

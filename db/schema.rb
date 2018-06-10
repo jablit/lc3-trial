@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180605161107) do
+ActiveRecord::Schema.define(version: 20180610220002) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -38,6 +38,20 @@ ActiveRecord::Schema.define(version: 20180605161107) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "notes", force: :cascade do |t|
+    t.integer  "startContainerIndex"
+    t.integer  "startOffset"
+    t.integer  "endContainerIndex"
+    t.integer  "endOffset"
+    t.text     "quote"
+    t.text     "notes"
+    t.integer  "lit_guide_id"
+    t.datetime "created_at",          null: false
+    t.datetime "updated_at",          null: false
+  end
+
+  add_index "notes", ["lit_guide_id"], name: "index_notes_on_lit_guide_id", using: :btree
+
   create_table "themes", force: :cascade do |t|
     t.string   "title",       null: false
     t.text     "description", null: false
@@ -50,5 +64,6 @@ ActiveRecord::Schema.define(version: 20180605161107) do
   add_index "themes", ["book_id"], name: "index_themes_on_book_id", using: :btree
 
   add_foreign_key "books", "authors"
+  add_foreign_key "notes", "lit_guides"
   add_foreign_key "themes", "books"
 end

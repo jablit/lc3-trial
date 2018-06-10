@@ -28,6 +28,7 @@ class LitRange {
 	createSpan() {
 	  var span = document.createElement('span');
 	  span.className = 'highlighted';
+    span.dataset.text = this.toString().replace(/\./g, '. '); // add a space after each period to account for multi-line selections;
 	  return span;
   }
 

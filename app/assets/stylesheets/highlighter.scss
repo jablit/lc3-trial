@@ -8,18 +8,18 @@ textarea.notes {
 	height: 250px;
 }
 
-.modal {
+.modal.note-dialog {
   text-align: center;
-}
 
-.modal-dialog {
-  display: inline-block;
-  text-align: left;
-  vertical-align: middle;
+	.modal-dialog {
+	  display: inline-block;
+	  text-align: left;
+	  vertical-align: middle;
+	}  
 }
 
 @media screen and (min-width: 768px) { 
-  .modal:before {
+  .modal.note-dialog:before {
     display: inline-block;
     vertical-align: middle;
     content: " ";

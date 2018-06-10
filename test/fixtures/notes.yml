@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  startContainerIndex: 1
+  startOffset: 1
+  endContainerIndex: 1
+  endOffset: 1
+  quote: MyText
+  notes: MyText
+  lit_guide_id: 
+
+two:
+  startContainerIndex: 1
+  startOffset: 1
+  endContainerIndex: 1
+  endOffset: 1
+  quote: MyText
+  notes: MyText
+  lit_guide_id: 
