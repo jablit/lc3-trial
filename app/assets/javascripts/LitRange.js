@@ -1,37 +1,18 @@
 class LitRange {
 
-	constructor() {
+	constructor(range) {//startContainer, endContainer, startOffset, endOffset) {
 		this.TEXT_NODE = 3;
 		this.DOCUMENT_POSITION_FOLLOWING = 4;
 		this.DOCUMENT_POSITION_CONTAINED_BY = 16;
 
-		if (window.getSelection) {
-    	this.selection = window.getSelection();
-    } else if (document.selection) { 
-    	// opera
-      this.selection = document.selection.createRange();
-    }
+    this.range = range;
+    this.startContainer = range.startContainer;
+    this.endContainer = range.endContainer;
+		this.startOffset = range.startOffset;
+		this.endOffset = range.endOffset;
 
-		if (this.selection.getRangeAt) {
-    	this.range = this.selection.getRangeAt(0);
-    } else { 
-    	// safari
-      this.range = document.createRange();
-      this.range.setStart(this.selection.anchorNode, this.selection.anchorOffset);
-      this.range.setEnd(this.selection.focusNode, this.selection.focusOffset);
-    }
-
-    this.startContainer = this.range.startContainer;
-    this.endContainer = this.range.endContainer;
-		this.startOffset = this.range.startOffset;
-		this.endOffset = this.range.endOffset;
-		this.collapsed = this.range.collapsed;
-
-		// we've captured all the data we need, so let's remove the selection
-		this.selection.removeAllRanges();
-
-    // ignore selection if it only contains whitespace or is collapsed
-    if (this.containsOnlyWhiteSpace() || this.selection.collapsed) {
+    // ignore selection if it only contains whitespace (also ignore collapsed selections)
+    if (this.containsOnlyWhiteSpace()) {
     	return;
     }
 
@@ -70,7 +51,7 @@ class LitRange {
         }
 
         nodes[i].push(node);
-        node = this.getSiblingOrParentOrder(node, 'next');
+        node = this.getSiblingOrParentNode(node, 'next');
         
         if (position == this.DOCUMENT_POSITION_CONTAINED_BY) {
           break;
@@ -83,16 +64,17 @@ class LitRange {
     return nodes;
 	}
 
-	getSiblingOrParentOrder(myNode, myOrder) {
-    var mySibling = myOrder + 'Sibling';
-    if (myNode[mySibling]) {
-        return myNode[mySibling];
+	getSiblingOrParentNode(node, order) {
+    var sibling = order + 'Sibling';
+
+    if (node[sibling]) {
+      return node[sibling];
     }
-    else if (myNode.parentNode) {
-        return this.getSiblingOrParentOrder(myNode.parentNode, myOrder);
+    else if (node.parentNode) {
+      return this.getSiblingOrParentNode(node.parentNode, order);
     }
     else {
-        return null;
+      return null;
     }
 	}
 
@@ -104,7 +86,7 @@ class LitRange {
 	split() {
 		// handle startContainer
 		if (this.startContainer.nodeType == this.TEXT_NODE && this.startOffset > 0) {
-			var splitContainer = this.range.startContainer.splitText(this.range.startOffset);
+			var splitContainer = this.startContainer.splitText(this.startOffset);
         
       // if same node, ensure they reference same container node
 			if (this.startContainer == this.endContainer) {
