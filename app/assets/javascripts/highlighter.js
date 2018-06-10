@@ -1,6 +1,8 @@
 $(function () {
 
 	function getRange(selection) {
+		console.log('selection', selection);
+
 		if (selection.getRangeAt) {
     	var range = selection.getRangeAt(0);
     } else { 
@@ -33,7 +35,7 @@ $(function () {
 
 	var $text = $('#text p');
 	
-	$(document).on('mouseup touchend', function () {
+	$('#text').on('mouseup touchend', function () {
 		console.log('mouseup/touchend');
 
 		// get selection
@@ -49,6 +51,7 @@ $(function () {
 		selection.removeAllRanges();
 	});
 
+	// http://localhost:3000/lit-guides/9
 	var highlights = [
 		{
 			startContainerIndex: 3,
@@ -67,7 +70,36 @@ $(function () {
 	for (var i = 0, ilen = highlights.length; i < ilen; i++) {
 		createHighlight(highlights[i]);
 	}
-
-	console.log('highlighter...');
+	
+	$(document).on('click', '.highlighted', function () {
+		var $this = $(this);
+		
+		console.log('you clicked a highlighted element...');
+		
+    BootstrapDialog.show({
+    	cssClass: 'note-dialog',
+	    title: 'Create Note',
+	    message: '<textarea class="form-control notes">',
+	    onshown: function (dialog) {
+      	dialog.$modalContent.find('textarea').focus();
+      },
+	    buttons: [
+	      {
+	        label: 'Cancel',
+	        action: function (dialog) {
+	        	dialog.close();
+	        }
+	      }, 
+	      {
+	        label: 'Save',
+	        cssClass: 'btn-primary',
+	        action: function (dialog) {
+	        	console.log('you clicked save?');
+	        	dialog.close();
+	        }
+	      }
+	    ]
+    });
+	});
 
 });

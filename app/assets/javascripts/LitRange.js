@@ -1,6 +1,6 @@
 class LitRange {
 
-	constructor(range) {//startContainer, endContainer, startOffset, endOffset) {
+	constructor(range) {
 		this.TEXT_NODE = 3;
 		this.DOCUMENT_POSITION_FOLLOWING = 4;
 		this.DOCUMENT_POSITION_CONTAINED_BY = 16;
