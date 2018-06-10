@@ -1,11 +1,12 @@
 class LitRange {
 
-	constructor(range) {
+	constructor(range, note) {
 		this.TEXT_NODE = 3;
 		this.DOCUMENT_POSITION_FOLLOWING = 4;
 		this.DOCUMENT_POSITION_CONTAINED_BY = 16;
 
     this.range = range;
+    this.note = note || {text: ''};
     this.startContainer = range.startContainer;
     this.endContainer = range.endContainer;
 		this.startOffset = range.startOffset;
@@ -27,9 +28,10 @@ class LitRange {
 
 	createSpan() {
 	  var span = document.createElement('span');
+    this.note.quote = this.toString().replace(/\./g, '. '); // add a space after each period to account for multi-line selections
+    span.dataset.note = JSON.stringify(this.note);
 	  span.className = 'highlighted';
-    span.dataset.text = this.toString().replace(/\./g, '. '); // add a space after each period to account for multi-line selections;
-	  return span;
+    return span;
   }
 
 	getNodes() {

@@ -1,8 +1,6 @@
 $(function () {
 
 	function getRange(selection) {
-		console.log('selection', selection);
-
 		if (selection.getRangeAt) {
     	var range = selection.getRangeAt(0);
     } else { 
@@ -33,8 +31,67 @@ $(function () {
 		var lit_range = new LitRange(range);
 	}
 
+	function convertUnderscoreToCamelCase(obj) {
+		var new_obj = {};
+		for (var i in obj) {
+			new_obj[i.replace(/_([a-z])/g, function (g) { return g[1].toUpperCase(); })] = obj[i];
+		}
+		return new_obj;
+	}
+
+	function convertCamelCaseToUnderscore(obj) {
+		var new_obj = {};
+		for (var i in obj) {
+			new_obj[i.split(/(?=[A-Z])/).join('_').toLowerCase()] = obj[i];
+		}
+		return new_obj;
+	}
+
+	function openNoteModal(note) {
+		var is_new = note && note.id ? false : true;
+		console.log('is_new', is_new);
+    BootstrapDialog.show({
+    	cssClass: 'note-dialog',
+	    title: is_new ? 'Edit Note' : 'Create Note',
+	    message: '<blockquote class="blockquote">' + note.quote + '</blockquote><textarea class="form-control notes">' + (note.text || '') + '</textarea>',
+	    onshown: function (dialog) {
+      	dialog.$modalContent.find('textarea').focus();
+      },
+	    buttons: [
+	      {
+	        label: 'Cancel',
+	        action: function (dialog) {
+	        	dialog.close();
+	        }
+	      }, 
+	      {
+	        label: 'Save',
+	        cssClass: 'btn-primary',
+	        action: function (dialog) {
+	        	note.text = dialog.$modalContent.find('textarea').val();
+	        	console.log('you clicked save?', note);
+
+	        	$.ajax({
+	        		data: {note: convertCamelCaseToUnderscore(note)},
+	        		method: is_new ? 'POST' : 'PUT',
+	        		url: (is_new ? '/notes' : '/notes/' + note.id) + '.json',
+	        	}).done(function (data) { 
+	        		console.log('save note has returned!', data);
+	        		note = convertUnderscoreToCamelCase(data);
+	        		console.log('note is now', note);
+	        	});
+
+	        	dialog.close();
+	        }
+	      }
+	    ]
+    });
+	}
+
+	/**
+	* Mouseup Touchend Event Handler
+	*/
 	var $text = $('#text p');
-	
 	$text.on('mouseup touchend', function () {
 		console.log('mouseup/touchend');
 
@@ -50,57 +107,36 @@ $(function () {
 		// we've captured all the data we need, so let's remove the selection
 		selection.removeAllRanges();
 	});
-
-	// http://localhost:3000/lit-guides/9
-	var highlights = [
-		{
-			startContainerIndex: 3,
-			endContainerIndex: 4,
-			startOffset: 99,
-			endOffset: 26
-		},
-		{
-			startContainerIndex: 6,
-			endContainerIndex: 6,
-			startOffset: 114,
-			endOffset: 207
-		}
-	]
-
-	for (var i = 0, ilen = highlights.length; i < ilen; i++) {
-		createHighlight(highlights[i]);
-	}
 	
+	/**
+	* Highlighted Phrase Click Handler
+	*/
 	$(document).on('click', '.highlighted', function () {
 		var $this = $(this);
-		
-		console.log('you clicked a highlighted element...');
-		
-    BootstrapDialog.show({
-    	cssClass: 'note-dialog',
-	    title: 'Create Note',
-	    message: '<blockquote class="blockquote">' + $this.data('text') + '</blockquote><textarea class="form-control notes">',
-	    onshown: function (dialog) {
-      	dialog.$modalContent.find('textarea').focus();
-      },
-	    buttons: [
-	      {
-	        label: 'Cancel',
-	        action: function (dialog) {
-	        	dialog.close();
-	        }
-	      }, 
-	      {
-	        label: 'Save',
-	        cssClass: 'btn-primary',
-	        action: function (dialog) {
-	        	var notes = dialog.$modalContent.find('textarea').val();
-	        	console.log('you clicked save?', notes);
-	        	dialog.close();
-	        }
-	      }
-	    ]
-    });
+
+		console.log('you clicked a highlighted element...', $this.data('note'));
+
+		openNoteModal($this.data('note'));
 	});
+
+	// http://localhost:3000/lit-guides/9
+	// var highlights = [
+	// 	{
+	// 		startContainerIndex: 3,
+	// 		endContainerIndex: 4,
+	// 		startOffset: 99,
+	// 		endOffset: 26
+	// 	},
+	// 	{
+	// 		startContainerIndex: 6,
+	// 		endContainerIndex: 6,
+	// 		startOffset: 114,
+	// 		endOffset: 207
+	// 	}
+	// ]
+
+	// for (var i = 0, ilen = highlights.length; i < ilen; i++) {
+	// 	createHighlight(highlights[i]);
+	// }
 
 });

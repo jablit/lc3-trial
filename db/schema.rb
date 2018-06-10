@@ -39,15 +39,15 @@ ActiveRecord::Schema.define(version: 20180610220002) do
   end
 
   create_table "notes", force: :cascade do |t|
-    t.integer  "startContainerIndex"
-    t.integer  "startOffset"
-    t.integer  "endContainerIndex"
-    t.integer  "endOffset"
+    t.integer  "start_container_index"
+    t.integer  "start_offset"
+    t.integer  "end_container_index"
+    t.integer  "end_offset"
     t.text     "quote"
-    t.text     "notes"
+    t.text     "text"
     t.integer  "lit_guide_id"
-    t.datetime "created_at",          null: false
-    t.datetime "updated_at",          null: false
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
   end
 
   add_index "notes", ["lit_guide_id"], name: "index_notes_on_lit_guide_id", using: :btree

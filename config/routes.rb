@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   # See how all your routes lay out with "rake routes".
 
   resources :lit_guides, only: [:index, :show], path: 'lit-guides'
+  resources :notes, only: [:create, :update, :destroy]
 
   # You can have the root of your site routed with "root"
   root 'application#index'
