@@ -1,4 +1,5 @@
 json.id note.id
+json.css_id note.css_id
 json.text note.text
 json.quote note.quote
 json.start_offset note.start_offset

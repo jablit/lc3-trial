@@ -1,23 +1,27 @@
 class LitRange {
 
-	constructor(range, note) {
+	constructor(opts) {
+    var opts = opts || {};
+    
 		this.TEXT_NODE = 3;
 		this.DOCUMENT_POSITION_FOLLOWING = 4;
 		this.DOCUMENT_POSITION_CONTAINED_BY = 16;
 
-    this.range = range;
-    this.note = note || {text: ''};
-    this.startContainer = range.startContainer;
-    this.endContainer = range.endContainer;
-		this.startOffset = range.startOffset;
-		this.endOffset = range.endOffset;
-
+    this.range = opts.range;
+    this.note = opts.note || {text: ''};
+    this.startContainerIndex = opts.startContainerIndex;
+    this.endContainerIndex = opts.endContainerIndex;
+    this.startContainer = this.range.startContainer;
+    this.endContainer = this.range.endContainer;
+    this._startOffset = this.range.startOffset;
+    this._endOffset = this.range.endOffset;
+		this.startOffset = this.range.startOffset;
+		this.endOffset = this.range.endOffset;
+    
     // ignore selection if it only contains whitespace (also ignore collapsed selections)
     if (this.containsOnlyWhiteSpace()) {
     	return;
     }
-
-		console.log('range good, proceed with highlighting...', this);
 
 		this.highlight();
 	}
@@ -28,9 +32,10 @@ class LitRange {
 
 	createSpan() {
 	  var span = document.createElement('span');
-    this.note.quote = this.toString().replace(/\./g, '. '); // add a space after each period to account for multi-line selections
-    span.dataset.note = JSON.stringify(this.note);
-	  span.className = 'highlighted';
+    var note = this.prepareNote();
+    span.dataset.note = JSON.stringify(note);
+    span.className = this.cssId();
+	  span.className += ' highlighted';
     return span;
   }
 
@@ -81,10 +86,24 @@ class LitRange {
     }
 	}
 
+  cssId() {
+    return 'highlight' + this._startOffset + '_' + this._endOffset + '_' + this.startContainerIndex + '_' + this.endContainerIndex;
+  }
+
 	highlight() {
 		this.split();
 		this.wrap();
 	}
+
+  prepareNote() {
+    this.note.cssId = this.cssId();
+    this.note.startOffset = this._startOffset;
+    this.note.endOffset = this._endOffset;
+    this.note.startContainerIndex = this.startContainerIndex;
+    this.note.endContainerIndex = this.endContainerIndex;
+    this.note.quote = this.toString().replace(/\./g, '. '); // add a space after each period to account for multi-line selections
+    return this.note;
+  }
 
 	split() {
 		// handle startContainer
@@ -115,25 +134,25 @@ class LitRange {
 	wrap() {
     var nodes = this.getNodes();
     var textNodeFilter = function () {
-	    if (this.nodeType != this.TEXT_NODE) {
-	    	return false;
-	    }
-	    return $.trim(this.textContent).length > 0;
+      if (this.nodeType != this.TEXT_NODE) {
+        return false;
+      }
+      return $.trim(this.textContent).length > 0;
     };
 
     for (var i = 0, ilen = nodes.length; i < ilen; i++) {
-	    if (!nodes[i][0]) {
-	    	// nothing to wrap
-	    	continue;
-	    }
+      if (!nodes[i][0]) {
+        // nothing to wrap
+        continue;
+      }
 
-	    for (var j = 0, jlen = nodes[i].length; j < jlen; j++) {
+      for (var j = 0, jlen = nodes[i].length; j < jlen; j++) {
         var node = nodes[i][j];
-	    	var all_nodes = $(node).find('*').add($(node)).contents().add($(node));
+        var all_nodes = $(node).find('*').add($(node)).contents().add($(node));
 
-	    	// filter out anything that isn't a text node, then wrap it
-	    	all_nodes.filter(textNodeFilter).wrap(this.createSpan());
-	    }
+        // filter out anything that isn't a text node, then wrap it
+        all_nodes.filter(textNodeFilter).wrap(this.createSpan());
+      }
     }
 	}
 

@@ -8,4 +8,11 @@
       #text
         = @lit_guide.text.html_safe
     .col-xs-12.col-sm-4
-      Right column - highlights/notes go here!
+      .sidebar-notes
+        - if @lit_guide.notes.length > 0
+          - @lit_guide.notes.each do |note|
+            = render '/notes/note', :note => note
+        - else
+          %p{class: 'text-center'} No notes
+
+%input{type: 'hidden', name: 'lit_guide_id', id: 'lit_guide_id', value: @lit_guide.id}

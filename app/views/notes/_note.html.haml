@@ -1,0 +1,6 @@
+%dl{class: 'note-sidebar', data: {note: (render '/notes/note.json', note: note)}}
+	%dt= note.quote
+	%dd= note.text
+	%hr
+	%button{type: :button, class: "btn btn-default btn-xs edit-note"} Edit
+	%button{type: :button, class: "btn btn-default btn-xs delete-note"} Delete

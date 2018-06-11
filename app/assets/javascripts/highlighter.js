@@ -1,5 +1,7 @@
 $(function () {
 
+	var $text = $('#text p');
+
 	function getRange(selection) {
 		if (selection.getRangeAt) {
     	var range = selection.getRangeAt(0);
@@ -22,13 +24,17 @@ $(function () {
     }
 	}
 
-	function createHighlight(highlight) {
-		var range = document.createRange();
+	function createLitRange(note) {
+		var opts = {};
+		
+		opts.note = note;
+		opts.range = document.createRange();
+		opts.startContainerIndex = note.startContainerIndex;
+		opts.endContainerIndex = note.endContainerIndex;
+		opts.range.setStart($text.get(note.startContainerIndex).childNodes[0], note.startOffset);
+		opts.range.setEnd($text.get(note.endContainerIndex).childNodes[0], note.endOffset);
 
-		range.setStart($text.get(highlight.startContainerIndex).childNodes[0], highlight.startOffset);
-		range.setEnd($text.get(highlight.endContainerIndex).childNodes[0], highlight.endOffset);
-
-		var lit_range = new LitRange(range);
+		return new LitRange(opts);
 	}
 
 	function convertUnderscoreToCamelCase(obj) {
@@ -49,7 +55,7 @@ $(function () {
 
 	function openNoteModal(note) {
 		var is_new = note && note.id ? false : true;
-		console.log('is_new', is_new);
+		
     BootstrapDialog.show({
     	cssClass: 'note-dialog',
 	    title: is_new ? 'Edit Note' : 'Create Note',
@@ -61,6 +67,9 @@ $(function () {
 	      {
 	        label: 'Cancel',
 	        action: function (dialog) {
+	        	if (is_new) {
+	        		removeHighlight(note);
+	        	}
 	        	dialog.close();
 	        }
 	      }, 
@@ -69,16 +78,14 @@ $(function () {
 	        cssClass: 'btn-primary',
 	        action: function (dialog) {
 	        	note.text = dialog.$modalContent.find('textarea').val();
-	        	console.log('you clicked save?', note);
-
+	        	note.lit_guide_id = $("#lit_guide_id").val();
+	        	
 	        	$.ajax({
 	        		data: {note: convertCamelCaseToUnderscore(note)},
 	        		method: is_new ? 'POST' : 'PUT',
-	        		url: (is_new ? '/notes' : '/notes/' + note.id) + '.json',
+	        		url: is_new ? '/notes' : '/notes/' + note.id,
 	        	}).done(function (data) { 
-	        		console.log('save note has returned!', data);
-	        		note = convertUnderscoreToCamelCase(data);
-	        		console.log('note is now', note);
+	        		$('.sidebar-notes').html(data);
 	        	});
 
 	        	dialog.close();
@@ -88,21 +95,27 @@ $(function () {
     });
 	}
 
+	function removeHighlight(note) {
+		$('.' + convertUnderscoreToCamelCase(note).cssId).contents().unwrap();
+	}
+
 	/**
 	* Mouseup Touchend Event Handler
 	*/
-	var $text = $('#text p');
-	$text.on('mouseup touchend', function () {
-		console.log('mouseup/touchend');
+	$text.on('mouseup touchend', function (e) {
+		if ($(e.target).hasClass('highlighted')) {
+			return;
+		}
 
 		// get selection
+		var opts = {};
 		var selection = getSelection();
-		var range = getRange(selection);
+		opts.range = getRange(selection);
+		opts.startContainerIndex = $text.index(selection.anchorNode.parentElement);
+		opts.endContainerIndex = $text.index(selection.focusNode.parentElement);
 
-		//console.log($text.index(selection.anchorNode.parentElement), $text.index(selection.focusNode.parentElement), range.startOffset, range.endOffset);
-
-		var lit_range = new LitRange(range);//.startContainer, range.endContainer, range.startOffset, range.endOffset);
-  	//console.log('lit_range', lit_range);
+		var lit_range = new LitRange(opts);
+		$('.' + lit_range.note.cssId).first().click(); // open the note modal
 
 		// we've captured all the data we need, so let's remove the selection
 		selection.removeAllRanges();
@@ -112,31 +125,39 @@ $(function () {
 	* Highlighted Phrase Click Handler
 	*/
 	$(document).on('click', '.highlighted', function () {
-		var $this = $(this);
-
-		console.log('you clicked a highlighted element...', $this.data('note'));
-
-		openNoteModal($this.data('note'));
+		openNoteModal($(this).data('note'));
 	});
 
-	// http://localhost:3000/lit-guides/9
-	// var highlights = [
-	// 	{
-	// 		startContainerIndex: 3,
-	// 		endContainerIndex: 4,
-	// 		startOffset: 99,
-	// 		endOffset: 26
-	// 	},
-	// 	{
-	// 		startContainerIndex: 6,
-	// 		endContainerIndex: 6,
-	// 		startOffset: 114,
-	// 		endOffset: 207
-	// 	}
-	// ]
+	/**
+	* Edit Note Handler
+	*/ 
+	$(document).on('click', '.edit-note', function () {
+		openNoteModal($(this).parent().data('note'));
+	});
 
-	// for (var i = 0, ilen = highlights.length; i < ilen; i++) {
-	// 	createHighlight(highlights[i]);
-	// }
+	/**
+	* Delete Note Handler
+	*/ 
+	$(document).on('click', '.delete-note', function () {
+		var $parent = $(this).parent();
+		var note = $parent.data('note');
+		
+  	$.ajax({
+  		method: 'DELETE',
+  		url: '/notes/' + note.id + '.json',
+  	}).done(function (data) { 
+  		$parent.fadeOut();
+  		setTimeout(function () {
+  			removeHighlight(note);
+  		}, 200);
+  	});
+	});
+
+	/**
+	* Load notes/highlights from sidebar
+	*/
+	$('.note-sidebar').each(function () {
+		createLitRange(convertUnderscoreToCamelCase($(this).data('note')));
+	});
 
 });
