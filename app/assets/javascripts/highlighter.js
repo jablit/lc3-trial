@@ -126,7 +126,9 @@ $(function () {
 	* Highlighted Phrase Click Handler
 	*/
 	$(document).on('click', '.highlighted', function () {
-		openNoteModal($('.note-sidebar[data-id="' + $(this).data('note').cssId + '"]').data('note'));
+		var highlight_note = $(this).data('note');
+		var sidebar_note = $('.note-sidebar[data-id="' + highlight_note.cssId + '"]').data('note')
+		openNoteModal(sidebar_note || highlight_note);
 	});
 
 	/**
@@ -147,7 +149,12 @@ $(function () {
   		method: 'DELETE',
   		url: '/notes/' + note.id + '.json',
   	}).done(function (data) { 
-  		$parent.fadeOut();
+  		$parent.fadeOut(function () {
+  			$parent.remove();
+  			if ($('.note-sidebar').length == 0) {
+  				$('.sidebar-notes').html('No notes');
+  			}
+  		});
   		setTimeout(function () {
   			removeHighlight(note);
   		}, 200);
