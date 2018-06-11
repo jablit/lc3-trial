@@ -86,6 +86,7 @@ $(function () {
 	        		url: is_new ? '/notes' : '/notes/' + note.id,
 	        	}).done(function (data) { 
 	        		$('.sidebar-notes').html(data);
+	        		$('#note-saved-banner').data('note', note).fadeIn();
 	        	});
 
 	        	dialog.close();
@@ -156,8 +157,18 @@ $(function () {
 	/**
 	* Load notes/highlights from sidebar
 	*/
-	$('.note-sidebar').each(function () {
+	jQuery.fn.reverse = [].reverse;
+	$('.note-sidebar').reverse().each(function () {
 		createLitRange(convertUnderscoreToCamelCase($(this).data('note')));
+	});
+
+	/**
+	* Note Saved Banner click to scroll handler
+	*/
+	$('#note-saved-banner').on('click', function () {
+		var note = $(this).data('note');
+		var $sidebar_note = $('.note-sidebar[data-id="' + note.cssId + '"]');
+		$('html, body').animate({scrollTop: $sidebar_note.offset().top});
 	});
 
 });

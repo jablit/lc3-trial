@@ -1,4 +1,4 @@
-%dl{class: 'note-sidebar', data: {note: (render '/notes/note.json', note: note)}}
+%dl{class: 'note-sidebar', data: {note: (render '/notes/note.json', note: note), id: note.css_id}}
 	%dt= note.quote
 	%dd= note.text
 	%hr
