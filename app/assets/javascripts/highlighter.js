@@ -126,7 +126,7 @@ $(function () {
 	* Highlighted Phrase Click Handler
 	*/
 	$(document).on('click', '.highlighted', function () {
-		openNoteModal($(this).data('note'));
+		openNoteModal($('.note-sidebar[data-id="' + $(this).data('note').cssId + '"]').data('note'));
 	});
 
 	/**

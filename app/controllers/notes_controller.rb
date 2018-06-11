@@ -16,8 +16,11 @@ class NotesController < ApplicationController
 	end
 
 	def update
-		@note.assign_attributes note
+		@note.assign_attributes note_params
 		@note.save
+		@notes = @note.lit_guide.notes
+
+		render 'sidebar_notes', :layout => false		
 	end
 
 	private
